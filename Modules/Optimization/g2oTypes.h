@@ -78,10 +78,9 @@ public:
          * Your code for task 3 here! Example:
          * _error = Eigen::Vector2d::Ones()*100;
          */
-        Eigen::Vector3d p3Dc = Tcw.map(p3Dw) ; //* p3DW
+        Eigen::Vector3d p3Dc = Tcw.map(p3Dw) ; //* p3DW Tcw * p3Dw
         Eigen::Vector2d p2D = pCamera->project(p3Dc);
         _error = obs - p2D;
-
     }
 
     bool isDepthPositive() {
@@ -114,7 +113,7 @@ public:
         * Your code for task 3 here! Example:
         * _error = Eigen::Vector2d::Ones()*100;
         */
-        Eigen::Vector3d p3Dc = Tcw.map(Xworld) ; //* p3DW
+        Eigen::Vector3d p3Dc = Tcw.map(Xworld) ;
         Eigen::Vector2d p2D = pCamera->project(p3Dc);
         _error = obs - p2D;
     }

@@ -76,8 +76,10 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
                 bestDist = dist;
                 bestIdx = j;
             }
-            else if(dist < secondBestDist){
-                secondBestDist = dist;
+            else {
+                if(dist < secondBestDist){
+                    secondBestDist = dist;
+                }
             }
 
         }
@@ -258,7 +260,7 @@ int searchWithProjection(Frame& currFrame, int th, std::unordered_set<ID>& vMapP
         }
 
         if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.9)){
-            currFrame.setMapPoint(bestIdx,pMP);
+            currFrame.setMapPoint(bestIdx, pMP);
             nMatches++;
         }
 
