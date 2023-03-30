@@ -35,6 +35,7 @@ int HammingDistance(const cv::Mat &a, const cv::Mat &b){
     return dist;
 }
 
+
 int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int>& vMatches, std::vector<cv::Point2f>& vPrevMatched){
     fill(vMatches.begin(),vMatches.end(),-1);
 
@@ -43,6 +44,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
     vector<cv::KeyPoint>& vRefKeys = refFrame.getKeyPoints();
 
     vector<int> vMatchedDistance(vRefKeys.size(),INT_MAX);
+    vector<int> vnMatches21(vRefKeys.size(),-1);
 
     cv::Mat refDesc = refFrame.getDescriptors();
     cv::Mat currDesc = currFrame.getDescriptors();
@@ -54,14 +56,15 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
         if(vRefKeys[i].octave > maxOctave){
             continue;
         }
+
         /*
-         * Your code for task 1 here!
+         * Your code for Lab 3 - Task 1 here!
          */
         vIndicesToCheck.clear();
 
         cv::Point2f uv = vRefKeys[i].pt;
         int nOctave = vRefKeys[i].octave;
-        float radius = 15 * currFrame.getScaleFactor(nOctave);
+        float radius = 30 * currFrame.getScaleFactor(nOctave);
         int bestDist = INT_MAX;
         int secondBestDist = INT_MAX;
         size_t bestIdx;
@@ -88,11 +91,12 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
             vMatchedDistance[i] = bestDist;
             nMatches++;
         }
+   
     }
 
     for(size_t i = 0; i < vMatches.size(); i++){
         if(vMatches[i] != -1){
-            vPrevMatched[i] = currFrame.getKeyPoint(vMatches[i]).pt;
+            vPrevMatched[i]=currFrame.getKeyPoint(vMatches[i]).pt;
         }
     }
 
@@ -113,6 +117,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
         cv::imshow("Test", outImg);
         cv::waitKey(0);
     }
+
     return nMatches;
 }
 
@@ -122,6 +127,7 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
     vector<size_t> vIndicesToCheck(100);
 
     vector<shared_ptr<MapPoint>> vRefMapPoints = refFrame.getMapPoints();
+
     shared_ptr<CameraModel> currCamera = currFrame.getCalibration();
     Sophus::SE3f Tcw = currFrame.getPose();
 
@@ -178,21 +184,18 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
     return nMatches;
 }
 
-int searchWithProjection(Frame& currFrame, int th, std::unordered_set<ID>& vMapPointsIds, Map* pMap){
+int searchWithProjection(Frame& currFrame, int th, std::vector<std::shared_ptr<MapPoint>>& vMapPoints){
     CameraModel* currCalibration = currFrame.getCalibration().get();
     Sophus::SE3f Tcw = currFrame.getPose();
 
     vector<size_t> vIndicesToCheck(100);
 
     int nMatches = 0, vCos = 0, invDist = 0, noClose = 0;
-    for(ID mpId : vMapPointsIds){
+    for(shared_ptr<MapPoint> pMP : vMapPoints){
         //Clear previous matches
         vIndicesToCheck.clear();
 
-        //Get MapPoint
-        shared_ptr<MapPoint> pMP = pMap->getMapPoint(mpId);
-
-        //For safety
+        //Check normal orientation
         assert(pMP);
 
         //Check normal orientation
@@ -220,6 +223,10 @@ int searchWithProjection(Frame& currFrame, int th, std::unordered_set<ID>& vMapP
             predictedOctave = 0;
         else if(predictedOctave > currFrame.getNumberOfScales())
             predictedOctave = currFrame.getNumberOfScales();
+
+        //Project MapPoint into the Frame
+        Eigen::Vector3f p3Dc = Tcw*pMP->getWorldPosition();
+        cv::Point2f uv = currCalibration->project(p3Dc);
 
         float radius = currFrame.getScaleFactor(predictedOctave);
         if(viewCos>0.998)
@@ -263,7 +270,7 @@ int searchWithProjection(Frame& currFrame, int th, std::unordered_set<ID>& vMapP
             currFrame.setMapPoint(bestIdx, pMP);
             nMatches++;
         }
-
+        
     }
 
     return nMatches;
@@ -355,9 +362,6 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
     cv::Mat descMat = pKF->getDescriptors();
     int nFused = 0;
 
-    int vCos = 0, invDist = 0, noClose = 0, depth = 0, empty = 0;
-
-
     for(size_t i = 0; i < vMapPoints.size(); i++){
         //Clear previous matches
         vIndicesToCheck.clear();
@@ -370,113 +374,14 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
         if(pMap->getNumberOfObservations(pMP->getId()) == 0)
             continue;
 
-        //Project MapPoint into the KeyFrame
-        Eigen::Vector3f p3Dc = Tcw * pMP->getWorldPosition();
-        cv::Point2f uv = calibration->project(p3Dc);
-
-        //Depth must be positive
-        if(p3Dc(2) < 0.0f){
-            depth++;
+        if(pMap->isMapPointInKeyFrame(pMP->getId(),pKF->getId()) != -1){
             continue;
         }
 
-        //Check distance is in the scale invariance region of the MapPoint
-        Eigen::Vector3f rayWorld = pMP->getWorldPosition() - pKF->getPose().inverse().translation();
-        float dist = rayWorld.norm();
-        float maxDistance = pMP->getMaxDistanceInvariance();
-        float minDistance = pMP->getMinDistanceInvariance();
-
-        if(dist < minDistance || dist > maxDistance){
-            invDist++;
-            continue;
-        }
-
-        float viewCos = rayWorld.normalized().dot(pMP->getNormalOrientation());
-        if(viewCos < 0.5){
-            vCos++;
-            continue;
-        }
-
-        //Predict scale
-        int predictedOctave = ceil(log(maxDistance/dist)/log(pKF->getScaleFactor(1)));
-        if(predictedOctave < 0)
-            predictedOctave = 0;
-        else if(predictedOctave > pKF->getNumberOfScales())
-            predictedOctave = pKF->getNumberOfScales();
-
-        // Search in a radius
-        float radius = 3.0f*pKF->getScaleFactor(predictedOctave);
-
-        pKF->getFeaturesInArea(uv.x,uv.y,radius,0,8,vIndicesToCheck);
-
-        if(vIndicesToCheck.size() == 0){
-            empty++;
-            continue;
-        }
-
-        //Get MapPoint descriptor
-        cv::Mat& desc = pMP->getDescriptor();
-
-        //Match with the one with the smallest Hamming distance
-        int bestDist = 255, secondBestDist = 255;
-        size_t bestIdx;
-        for(auto j : vIndicesToCheck){
-            //Check reprojection error
-            cv::KeyPoint key = pKF->getKeyPoint(j);
-            cv::Point2f kpDist = key.pt - uv;
-            if(kpDist.dot(kpDist) > 5.99)
-                continue;
-
-            cv::Mat currDesc = descMat.row(j);
-            int dist = HammingDistance(desc,currDesc);
-
-            if(dist < bestDist){
-                secondBestDist = bestDist;
-                bestDist = dist;
-                bestIdx = j;
-            }
-            else if(dist < secondBestDist){
-                secondBestDist = dist;
-            }
-        }
-
-        if(bestDist <= th){
-            if(vKFMps[bestIdx]){
-
-                pMap->checkKeyFrame(pKF->getId());
-                if(vKFMps[bestIdx]->getId() == pMP->getId())
-                    continue;
-
-                pMap->fuseMapPoints(pMP->getId(),vKFMps[bestIdx]->getId());
-                pMap->checkKeyFrame(pKF->getId());
-            }
-            else{
-                int idx = pMap->isMapPointInKeyFrame(pMP->getId(),pKF->getId());
-                if(idx != -1){
-                    pKF->setMapPoint(idx,nullptr);
-                    pMap->removeObservation(pKF->getId(),pMP->getId());
-                    pMap->checkKeyFrame(pKF->getId());
-                }
-
-                pKF->setMapPoint(bestIdx,pMP);
-                pMap->addObservation(pKF->getId(),pMP->getId(),bestIdx);
-                pMap->checkKeyFrame(pKF->getId());
-            }
-
-            nFused++;
-        }
-        else{
-            noClose++;
-        }
+        /*
+         * Your code for Lab 4 - Task 3 here!
+         */
     }
 
     return nFused;
-}
-
-void Frame::setTimestamp(double ts) {
-    timestamp_ = ts;
-}
-
-double Frame::getTimestamp() {
-    return timestamp_;
 }

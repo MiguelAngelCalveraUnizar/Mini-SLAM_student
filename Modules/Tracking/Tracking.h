@@ -57,7 +57,7 @@ public:
     /*
      * Performs the tracking for an image. Returns true on success
      */
-    bool doTracking(const cv::Mat& im, const double timestamp, Sophus::SE3f& Tcw);
+    bool doTracking(const cv::Mat& im, Sophus::SE3f& Tcw);
 
     /*
      * Gets the last KeyFrame inserted into the map
@@ -75,8 +75,6 @@ private:
 
     //Performs the camera tracking with a constant velocity model
     bool cameraTracking();
-
-    void triangulateExtraMapPoints();
 
     //Checks if we need to insert a new KeyFrame into the map
     bool needNewKeyFrame();

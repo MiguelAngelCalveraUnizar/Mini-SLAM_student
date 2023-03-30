@@ -97,12 +97,7 @@ void FrameVisualizer::drawCurrentFrame(Frame &f) {
     }
 
     stringstream s;
-    if(nMatches != 0){
-        s << "SLAM MODE | Matches: " << nMatches;
-    }
-    else{
-        s << "TRACK LOST ";
-    }
+    s << "SLAM MODE | Matches: " << nMatches;
 
     int baseline=0;
     cv::Size textSize = cv::getTextSize(s.str(),cv::FONT_HERSHEY_PLAIN,1,1,&baseline);

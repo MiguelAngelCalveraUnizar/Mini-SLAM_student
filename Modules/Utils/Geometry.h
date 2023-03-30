@@ -39,7 +39,7 @@ float cosRayParallax(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
  * Proceedings of the IEEE/CVF International Conference on Computer Vision. 2019.
  */
 void triangulate(const Eigen::Vector3f &xn1, const Eigen::Vector3f &xn2,
-                 const Sophus::SE3f &Tcw1, const Sophus::SE3f &Tcw2, Eigen::Vector3f &x3D);
+                 const Sophus::SE3f &T1w, const Sophus::SE3f &T2w, Eigen::Vector3f &x3D);
 
 /*
  * Squared reprojection error

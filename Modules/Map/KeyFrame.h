@@ -118,24 +118,6 @@ public:
     void getFeaturesInArea(const float x, const float y, const float radius, const int minLevel, const int maxLevel, std::vector<size_t> &vIndices);
 
     /*
-     * Checks that all MapPoints in a KeyFrame are good: have low reprojetion error.
-     * USED JUST FOR DEBUG PURPOSES
-     */
-    void checkAllMapPointsAreGood(){
-        for(size_t i = 0; i < vMapPoints_.size(); i++){
-            std::shared_ptr<MapPoint> pMP = vMapPoints_[i];
-            if(pMP){
-                Eigen::Vector3f p3Dc = Tcw_ * pMP->getWorldPosition();
-                cv::Point2f puv = calibration_->project(p3Dc);
-                cv::Point2f uv = vKeys_[i].pt;
-                cv::Point2f perr = puv-uv;
-                float err = perr.dot(perr*vInvSigma2_[vKeys_[i].octave]);
-                assert(err < 6.0f);
-            }
-        }
-    }
-
-    /*
      * Sets the timestamp fo the frame
      */
     void setTimestamp(double ts);

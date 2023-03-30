@@ -81,7 +81,6 @@ public:
     //-----------------------------------------------------------------
     //Useful overloadings to allow the use of different data structures
     //-----------------------------------------------------------------
-
     cv::Point2f project(Eigen::Vector3f & X){
         Eigen::Vector2f uv;
 
@@ -124,6 +123,7 @@ public:
 
         return jac.cast<double>();
     }
+
 
 protected:
     std::vector<float> vParameters_;    //Vector of calibration parametets

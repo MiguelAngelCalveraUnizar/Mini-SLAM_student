@@ -331,3 +331,11 @@ void Frame::checkAllMapPointsAreGood(){
     }
 }
 
+void Frame::setTimestamp(double ts) {
+    timestamp_ = ts;
+}
+
+double Frame::getTimestamp() {
+    return timestamp_;
+}
+

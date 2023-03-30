@@ -326,7 +326,7 @@ bool MonocularMapInitializer::reconstructPoints(const Sophus::SE3f &Tcw, std::ve
     size_t idx = min(50,int(vParallax.size()-1));
     float _parallax = vParallax[idx];
 
-    if(nTriangulated > 100 && _parallax < 0.9997) {
+    if(nTriangulated > 100 && _parallax > fMinParallax_) {
         return true;
     }
     else{

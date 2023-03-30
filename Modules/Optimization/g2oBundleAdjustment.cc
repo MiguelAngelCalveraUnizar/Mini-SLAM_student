@@ -48,7 +48,6 @@ void bundleAdjustment(Map* pMap){
     );
 
     optimizer.setAlgorithm(solver);
-    //Set to true to see how the optimization error evolves
     optimizer.setVerbose(true);
 
     const float thHuber2D = sqrt(5.99);
@@ -244,7 +243,7 @@ void localBundleAdjustment(Map* pMap, ID currKeyFrameId){
     unordered_map<MapPoint_,size_t> mMapPointId;
 
     //Get local map
-    unordered_set<ID> sLocalMapPoints, sLocalKeyFrames, sFixedKeyFrames;
+    set<ID> sLocalMapPoints, sLocalKeyFrames, sFixedKeyFrames;
     pMap->getLocalMapOfKeyFrame(currKeyFrameId,sLocalMapPoints,sLocalKeyFrames,sFixedKeyFrames);
 
     //Create optimizer
@@ -256,7 +255,7 @@ void localBundleAdjustment(Map* pMap, ID currKeyFrameId){
     );
 
     optimizer.setAlgorithm(solver);
-    optimizer.setVerbose(false);
+    optimizer.setVerbose(true);
 
     const float thHuber2D = sqrt(5.99);
 

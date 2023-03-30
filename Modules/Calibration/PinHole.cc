@@ -24,7 +24,7 @@
 
 void PinHole::project(const Eigen::Vector3f& p3D, Eigen::Vector2f& p2D){
     /*
-     * Your code for task2 here!
+     * Your code for Lab 3 - Task 2 here!
      */
     float x = p3D[0];
     float y = p3D[1];
@@ -36,9 +36,8 @@ void PinHole::project(const Eigen::Vector3f& p3D, Eigen::Vector2f& p2D){
 
 void PinHole::unproject(const Eigen::Vector2f& p2D, Eigen::Vector3f& p3D) {
     /*
-     * Your code for task2 here!
+     * Your code for Lab 3 - Task 2 here!
      */
-
     float X = p2D[0];
     float Y = p2D[1];
 
@@ -49,7 +48,7 @@ void PinHole::unproject(const Eigen::Vector2f& p2D, Eigen::Vector3f& p3D) {
 
 void PinHole::projectJac(const Eigen::Vector3f& p3D, Eigen::Matrix<float,2,3>& Jac) {
     /*
-     * Your code for task2 here!
+     * Your code for Lab 3 - Task 2 here!
      */
     auto x = p3D[0];
     auto y = p3D[1];
@@ -60,7 +59,6 @@ void PinHole::projectJac(const Eigen::Vector3f& p3D, Eigen::Matrix<float,2,3>& J
     Jac(1,0) = 0;
     Jac(1,1) = fy/z;
     Jac(1,2) = -(fy*y)/(z*z);
-
 }
 
 void PinHole::unprojectJac(const Eigen::Vector2f& p2D, Eigen::Matrix<float,3,2>& Jac) {

@@ -72,10 +72,10 @@ public:
         const VertexSBAPointXYZ* v2 = static_cast<const VertexSBAPointXYZ*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);      //Observed point in the image
         Eigen::Vector3d p3Dw = v2->estimate();  //Predicted 3D world position  of the point
-        g2o::SE3Quat Tcw = v1->estimate();      //Predicted camera pose
+        g2o::SE3Quat Tcw = v1->estimate();      //Preficted camera pose
 
         /*
-         * Your code for task 3 here! Example:
+         * Your code for Lab 3 - Task 3 here! Example:
          * _error = Eigen::Vector2d::Ones()*100;
          */
         Eigen::Vector3d p3Dc = Tcw.map(p3Dw) ; //* p3DW Tcw * p3Dw
@@ -107,10 +107,10 @@ public:
     void computeError()  {
         const g2o::VertexSE3Expmap* v1 = static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
         Eigen::Vector2d obs(_measurement);  //Observed point in the image
-        g2o::SE3Quat Tcw = v1->estimate();  //Predicted camera pose
+        g2o::SE3Quat Tcw = v1->estimate();  //Preficted camera pose
 
         /*
-        * Your code for task 3 here! Example:
+        * Your code for Lab 3 - Task 3 here! Example:
         * _error = Eigen::Vector2d::Ones()*100;
         */
         Eigen::Vector3d p3Dc = Tcw.map(Xworld) ;

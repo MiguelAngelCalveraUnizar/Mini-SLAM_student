@@ -56,6 +56,11 @@ public:
     void insertKeyFrame(std::shared_ptr<KeyFrame> pKF);
 
     /*
+     * Removes a MapPoint from the map
+     */
+    void removeMapPoint(ID id);
+
+    /*
      * Gets the KeyFrame with the given id
      */
     std::shared_ptr<KeyFrame> getKeyFrame(ID id);
@@ -82,7 +87,7 @@ public:
     std::vector<std::pair<ID,int>> getCovisibleKeyFrames(ID kfId);
 
     /*
-     * Gets the number of common observations between 2 KeyFrames
+     * Gets the number of commong observations between 2 KeyFrames
      */
     int numberOfCommonObservationsBetweenKeyFrames(ID kf1, ID kf2);
 
@@ -100,8 +105,8 @@ public:
      * Gets the local map of a given KeyFrame. The local map is composed by the 1-neighbour KeyFrames and its
      * observed MapPoints
      */
-    void getLocalMapOfKeyFrame(ID kfId, std::unordered_set<ID>& sLocalMapPointsIds, std::unordered_set<ID>& sLocalKeyFramesIds,
-                                std::unordered_set<ID>& sLocalFixedKeyFramesIds);
+    void getLocalMapOfKeyFrame(ID kfId, std::set<ID>& sLocalMapPointsIds, std::set<ID>& sLocalKeyFramesIds,
+                                std::set<ID>& sLocalFixedKeyFramesIds);
 
     /*
      * Fuses 2 MapPoints in one so the final MapPoints holds the observation from both
@@ -123,7 +128,7 @@ public:
      * in the graph. FOR DEBUG PURPOSES ONLY
      */
     void checkKeyFrame(ID kfId){
-        std::shared_ptr<KeyFrame> pKF = mKeyFrames_[kfId];
+        /*std::shared_ptr<KeyFrame> pKF = mKeyFrames_[kfId];
         std::vector<std::shared_ptr<MapPoint>>& vMps = pKF->getMapPoints();
 
         //Node to the KeyFrame
@@ -146,7 +151,7 @@ public:
             }
         }
 
-        assert(graphIds.size() == 0);
+        assert(graphIds.size() == 0);*/
     }
 
 private:
@@ -160,6 +165,17 @@ private:
      */
     std::unordered_map<ID,std::shared_ptr<MapPoint>> mMapPoints_;
     std::unordered_map<ID,std::shared_ptr<KeyFrame>> mKeyFrames_;
+
+    /*
+     * Observation graph
+     */
+    std::unordered_map<ID,std::unordered_map<ID,size_t>> mKeyFrameObs_;
+    std::unordered_map<ID,std::unordered_map<ID,size_t>> mMapPointObs_;
+
+    /*
+     * Covisibility graph
+     */
+    std::unordered_map<ID,std::unordered_map<ID,int>> mCovisibilityGraph_;
 
     /*
      * Observation graph

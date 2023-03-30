@@ -48,6 +48,21 @@ public:
     void doMapping(std::shared_ptr<KeyFrame>& pCurrKeyFrame);
 
 private:
+    /*
+     * Removes from the map redundant or wrongly triangulated points
+     */
+    void mapPointCulling();
+
+    /*
+     * Triangulates new MapPoints with the current KeyFrame
+     */
+    void triangulateNewMapPoints();
+
+    /*
+     * Matches MapPoints from the current KeyFrame with the previous ones and checks for duplicates
+     */
+    void checkDuplicatedMapPoints();
+
     std::shared_ptr<Map> pMap_;
 
     std::shared_ptr<KeyFrame> currKeyFrame_;

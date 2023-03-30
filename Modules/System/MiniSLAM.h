@@ -52,7 +52,7 @@ public:
     /*
      * Process an image. Computes in Tcw the camera pose of the image
      */
-    bool processImage(const cv::Mat& im, const double timestamp, Sophus::SE3f& Tcw);
+    bool processImage(const cv::Mat& im, Sophus::SE3f& Tcw);
 
     void runGlobalBundleAdjustment();
 

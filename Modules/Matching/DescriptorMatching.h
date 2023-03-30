@@ -45,7 +45,7 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
 /*
  * Searches matches with a given vector of MapPoints by prijecting them into the current frame
  */
-int searchWithProjection(Frame& currFrame, int th, std::unordered_set<ID>& vMapPointsIds, Map* pMap);
+int searchWithProjection(Frame& currFrame, int th, std::vector<std::shared_ptr<MapPoint>>& vMapPoints);
 
 /*
  * Searches matches between KeyFrames that fulfill the epipolar constrain to later triangulate a MapPoint

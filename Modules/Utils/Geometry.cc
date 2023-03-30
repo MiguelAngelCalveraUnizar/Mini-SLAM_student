@@ -22,8 +22,8 @@ float cosRayParallax(const Eigen::Vector3f& a, const Eigen::Vector3f& b){
 }
 
 void triangulate(const Eigen::Vector3f &xn1, const Eigen::Vector3f &xn2,
-                 const Sophus::SE3f &Tcw1, const Sophus::SE3f &Tcw2, Eigen::Vector3f &x3D){
-    Sophus::SE3f T21 = Tcw2 * Tcw1.inverse();
+                 const Sophus::SE3f &T1w, const Sophus::SE3f &T2w, Eigen::Vector3f &x3D){
+    Sophus::SE3f T21 = T2w * T1w.inverse();
     Eigen::Vector3f m0 = T21.rotationMatrix() * xn1;
     Eigen::Vector3f m1 = xn2;
 
@@ -46,7 +46,7 @@ void triangulate(const Eigen::Vector3f &xn1, const Eigen::Vector3f &xn2,
     float lambda1 = z.dot(T21.translation().cross(m0_))/(z.squaredNorm());
     Eigen::Vector3f test = lambda1 * m1_;
 
-    x3D = Tcw2.inverse() * p3D1;
+    x3D = T2w.inverse() * p3D1;
 }
 
 float squaredReprojectionError(cv::Point2f &p1, cv::Point2f &p2){
@@ -57,12 +57,11 @@ float squaredReprojectionError(cv::Point2f &p1, cv::Point2f &p2){
 }
 
 Eigen::Matrix<float,3,3> computeEssentialMatrixFromPose(Sophus::SE3f& T12){
-    Eigen::Vector3f t = T12.translation();
-    Eigen::Matrix<float,3,3> that;
-    that << 0, -t(2), t(1),
-            t(2), 0, -t(0),
-            -t(1), t(0), 0;
-    Eigen::Matrix<float,3,3> E = T12.rotationMatrix() * that;
+    Eigen::Matrix<float,3,3> E;
+
+    /*
+     * Your code for Lab 4 - Task 2 here!
+     */
 
     return E;
 }
