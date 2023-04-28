@@ -55,15 +55,15 @@ int main(int argc, char **argv){
     //Process the sequence
     cv::Mat currIm;
     double currTs;
-    for(int i = 0; i < sequence.getLenght(); i++){
+    for(int i = 150; i < sequence.getLenght(); i++){
         sequence.getLeftImage(i,currIm);
         sequence.getTimeStamp(i,currTs);
 
         Sophus::SE3f Tcw;
-        if(SLAM.processImage(currIm, currTs, Tcw)){
+        if(SLAM.processImage(currIm, Tcw)){
             Sophus::SE3f Twc = Tcw.inverse();
             //Save predicted pose to the file
-            trajectoryFile << setprecision(17) << currTs << "," << setprecision(7) << Twc.translation()(0) << ",";
+            trajectoryFile << setprecision(17) << currTs*1e9 << "," << setprecision(7) << Twc.translation()(0) << ",";
             trajectoryFile << Twc.translation()(1) << "," << Twc.translation()(2) << ",";
             trajectoryFile << Twc.unit_quaternion().x() << "," << Twc.unit_quaternion().y() << ",";
             trajectoryFile << Twc.unit_quaternion().z() << "," << Twc.unit_quaternion().w() << endl;
